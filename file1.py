@@ -1,11 +1,14 @@
-def add(one, two):
+def subtract(one, two, variable=True):
     random = 5
-    return one + two
+    print("hello")
+    three = one + two
+    four = 4
+    return three, four
 
 def main():
     var1 = (int)(input("var 1: "))
     var2 = (int)(input("var 2: "))
-    sum = add(var1, var2)
+    sum = subtract(var1, var2)
     print(sum)
 
 if __name__ == "__main__":
