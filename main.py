@@ -20,23 +20,35 @@ def code_to_ast(code_file, print_ast = False):
         print(ast.dump(code_ast, indent = 4))
     return code_ast
 
-# checks the number of outputs in a function.
-def check_output_count(function):
-    output_count = 0
-    function_return = False
+# # checks the number of outputs in a function.
+# def check_output_count(function):
+#     output_count = 0
+#     function_return = False
+#     return_node = ast.Return
+#     for attribute in function.body:
+#         if isinstance(attribute, ast.Return):
+#             function_return = True
+#             return_node = attribute
+#             break
+#     if function_return is False:
+#         return output_count
+#     if isinstance(return_node.value, ast.Tuple) or isinstance(return_node.value, ast.List):
+#         output_count = len(return_node.value.elts)
+#     else:
+#         output_count = 1
+#     return output_count
+
+def check_return_type(function):
     return_node = ast.Return
+    function_returns = False
     for attribute in function.body:
         if isinstance(attribute, ast.Return):
-            function_return = True
             return_node = attribute
-            break
-    if function_return is False:
-        return output_count
-    if isinstance(return_node.value, ast.Tuple) or isinstance(return_node.value, ast.List):
-        output_count = len(return_node.value.elts)
-    else:
-        output_count = 1
-    return output_count
+            function_returns = True
+            return return_node.value
+        
+    if function_returns is False:
+        return None
 # Creates a profile list from a FunctionDef based on similarity scoring attributes
 # (todo: document how/what we determine similarity with)
 def create_profile(function):
@@ -46,11 +58,10 @@ def create_profile(function):
         parameter_count += 1
     # datatype of inputs
     
-    # number of outputs
-    output_count = check_output_count(function)
-    print(output_count)
-
-    # datatype of outputs
+    # function return type
+    return_type = check_return_type(function)
+    print("function return type: ")
+    print(return_type)
     # number of variable declarations
     # number of if statements
     # number of for loops
@@ -79,6 +90,7 @@ def main():
     function_list_2 = make_functiondef_list(ast_2)
 
     create_profile(function_list_1[0])
+    create_profile(function_list_1[1])
     compare_codes(function_list_1, function_list_2)
     print("End.")
 
