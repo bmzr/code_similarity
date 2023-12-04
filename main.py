@@ -1,4 +1,6 @@
 import ast
+import numpy
+import copy
 
 class functiondef_visitor(ast.NodeVisitor):
     def __init__(self):
@@ -32,7 +34,7 @@ class functiondef_visitor(ast.NodeVisitor):
             elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.BinOp):
                 bin_op_count += 1
 
-        function_profile = (node.name, parameter_count, var_declaration_count, if_count, for_loop_count, while_loop_count, function_call_count, bin_op_count)
+        function_profile = [node.name, parameter_count, var_declaration_count, if_count, for_loop_count, while_loop_count, function_call_count, bin_op_count]
         self.function_profiles.append(function_profile)
         self.generic_visit(node)
 
@@ -49,11 +51,69 @@ def code_to_ast(code_file, print_ast = False):
         print(ast.dump(code_ast, indent = 4))
     return code_ast
 
+# changes profile values based on vector scalars used to calculate function distance.
+def apply_scalars(list):
+    # attribute weights add up to 100%.
+    # higher weight = the attribute matters more for the similarity calculation.
+    # weights are used as vector scalars.
+    attribute_weights = (
+        0.3,    # parameter_count
+        0.05,   # var_declaration_count
+        0.1,    # if_count
+        0.2,    # for_loop_count
+        0.2,    # while_loop_count
+        0.1,    # function_call_count
+        0.05    # bin_op_count
+    )
+    for profile in list:
+        for i in range(7):
+            profile[i+1] *= attribute_weights[i]
+
+def remove_name(list):
+    for sublist in list:
+        sublist.pop(0)
+
+# given function profile lists, compare each function to one another
+# and create a similarity matrix. 
 def compare_codes(list_1, list_2):
-    for function_l1 in list_1:
-        for function_l2 in list_2:
-            if len(function_l2.args.args) == len(function_l1.args.args):
-                print("function " + function_l1.name + "and function " + function_l2.name + "have the same function name.")
+    # copy list to keep names
+    list_1_copy = copy.deepcopy(list_1)
+    list_2_copy = copy.deepcopy(list_2)
+
+    # apply scalars
+    list_1_names = [sublist[0] for sublist in list_1]
+    list_2_names = [sublist[0] for sublist in list_2]
+    apply_scalars(list_1)
+    apply_scalars(list_2)
+
+    # get distance matrix
+    distance_matrix = []
+    distance_row = []
+    similarity_matrix = []
+    similarity_row = []
+    for profile_1 in list_1:
+        profile_1_name = profile_1.pop(0)
+        for profile_2 in list_2:
+            profile_2_name = profile_2.pop(0)
+            print(f"comparing {profile_1_name}() in file 1 and {profile_2_name}() in file 2")
+            distance = numpy.linalg.norm(numpy.array(profile_1) - numpy.array(profile_2))
+            print(f"Distance: {distance}")
+            profile_2.insert(0, profile_2_name)
+            distance_row.append(distance)
+            similarity = abs(distance - 1) # complement
+            similarity_row.append(f"{profile_1_name} in file 1 vs. {profile_2_name} in file 2: {similarity:.1%}")
+        profile_1.insert(0, profile_1_name)
+        distance_matrix.append(distance_row)
+        similarity_matrix.append(similarity_row)
+        distance_row = []
+        similarity_row = []
+
+    print("distance matrix:")
+    for row in distance_matrix:
+        print(row)
+    print("similarity matrix:")
+    for row in similarity_matrix:
+        print(row)
     
 def main():
     # code_file_1 = open(input("Enter a code file name (code file 1): "), 'r')
@@ -77,6 +137,8 @@ def main():
     print(function_list_1)
     print("FUNCTION LIST 2: ", end = '')
     print(function_list_2)
+
+    compare_codes(function_list_1, function_list_2)
     print("End.")
 
 if __name__ == "__main__":
