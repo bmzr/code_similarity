@@ -75,13 +75,7 @@ def remove_name(list):
 # given function profile lists, compare each function to one another
 # and create a similarity matrix. 
 def compare_codes(list_1, list_2):
-    # copy list to keep names
-    list_1_copy = copy.deepcopy(list_1)
-    list_2_copy = copy.deepcopy(list_2)
-
     # apply scalars
-    list_1_names = [sublist[0] for sublist in list_1]
-    list_2_names = [sublist[0] for sublist in list_2]
     apply_scalars(list_1)
     apply_scalars(list_2)
 
@@ -115,9 +109,6 @@ def compare_codes(list_1, list_2):
 def main():
     code_file_1 = open(input("Enter a code file name (code file 1): "), 'r')
     code_file_2 = open(input("Enter a code file name (code file 2): "), 'r')
-
-    #code_file_1 = open("file1.py", 'r')
-    #code_file_2 = open("file2.py", 'r')
 
     #print("\n------------------CODE FILE 1------------------")
     ast_1 = code_to_ast(code_file_1)
