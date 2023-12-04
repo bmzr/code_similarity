@@ -45,7 +45,6 @@ def code_to_ast(code_file, print_ast = False):
     code_segment = ''
     for line in code_lines:
         code_segment += line
-    print(code_segment)
     code_ast = ast.parse(code_segment)
     if print_ast:
         print(ast.dump(code_ast, indent = 4))
@@ -95,37 +94,35 @@ def compare_codes(list_1, list_2):
         profile_1_name = profile_1.pop(0)
         for profile_2 in list_2:
             profile_2_name = profile_2.pop(0)
-            print(f"comparing {profile_1_name}() in file 1 and {profile_2_name}() in file 2")
+            #print(f"comparing {profile_1_name}() in file 1 and {profile_2_name}() in file 2")
             distance = numpy.linalg.norm(numpy.array(profile_1) - numpy.array(profile_2))
-            print(f"Distance: {distance}")
+            #print(f"Distance: {distance}")
             profile_2.insert(0, profile_2_name)
             distance_row.append(distance)
             similarity = abs(distance - 1) # complement
-            similarity_row.append(f"{profile_1_name} in file 1 vs. {profile_2_name} in file 2: {similarity:.1%}")
+            similarity_row.append(f"{profile_1_name}() in file 1 vs. {profile_2_name}() in file 2: {similarity:.1%}")
         profile_1.insert(0, profile_1_name)
         distance_matrix.append(distance_row)
         similarity_matrix.append(similarity_row)
         distance_row = []
         similarity_row = []
 
-    print("distance matrix:")
-    for row in distance_matrix:
-        print(row)
-    print("similarity matrix:")
+    #print("similarity matrix:")
     for row in similarity_matrix:
-        print(row)
+        for score in row:
+            print(score)
     
 def main():
-    # code_file_1 = open(input("Enter a code file name (code file 1): "), 'r')
-    # code_file_2 = open(input("Enter a code file name (code file 2): "), 'r')
+    code_file_1 = open(input("Enter a code file name (code file 1): "), 'r')
+    code_file_2 = open(input("Enter a code file name (code file 2): "), 'r')
 
-    code_file_1 = open("file1.py", 'r')
-    code_file_2 = open("file2.py", 'r')
+    #code_file_1 = open("file1.py", 'r')
+    #code_file_2 = open("file2.py", 'r')
 
-    print("\n------------------CODE FILE 1------------------")
-    ast_1 = code_to_ast(code_file_1, print_ast=True)
-    print("\n------------------CODE FILE 2------------------")
-    ast_2 = code_to_ast(code_file_2, print_ast=True)
+    #print("\n------------------CODE FILE 1------------------")
+    ast_1 = code_to_ast(code_file_1)
+    #print("\n------------------CODE FILE 2------------------")
+    ast_2 = code_to_ast(code_file_2)
 
     ast_1_node_visitor = functiondef_visitor()
     ast_1_node_visitor.visit(ast_1)
@@ -133,13 +130,8 @@ def main():
     ast_2_node_visitor = functiondef_visitor()
     ast_2_node_visitor.visit(ast_2)
     function_list_2 = ast_2_node_visitor.function_profiles
-    print("FUNCTION LIST 1: ", end = '')
-    print(function_list_1)
-    print("FUNCTION LIST 2: ", end = '')
-    print(function_list_2)
 
     compare_codes(function_list_1, function_list_2)
-    print("End.")
 
 if __name__ == "__main__":
     main()
