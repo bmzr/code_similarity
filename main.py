@@ -1,12 +1,12 @@
 import ast
 
-# Given an AST, create a list of FunctionDef nodes.
-def make_functiondef_list(code_ast):
-    functiondef_list = []
-    for object in code_ast.body:
-        if isinstance(object, ast.FunctionDef):
-            functiondef_list.append(object)
-    return functiondef_list
+class functiondef_visitor(ast.NodeVisitor):
+    def __init__(self):
+        self.functiondefs = []
+    
+    def visit_FunctionDef(self, node):
+        self.functiondefs.append(node)
+        self.generic_visit(node)
 
 # Given a code file pointer, create an AST structure.
 # Pass True to print_ast to print out the AST structure to console.
@@ -49,6 +49,7 @@ def check_return_type(function):
         
     if function_returns is False:
         return None
+    
 # Creates a profile list from a FunctionDef based on similarity scoring attributes
 # (todo: document how/what we determine similarity with)
 def create_profile(function):
@@ -56,13 +57,12 @@ def create_profile(function):
     parameter_count = 0
     for arg in function.args.args:
         parameter_count += 1
-    # datatype of inputs
-    
     # function return type
     return_type = check_return_type(function)
     print("function return type: ")
     print(return_type)
     # number of variable declarations
+    
     # number of if statements
     # number of for loops
     # number of while loops
@@ -86,8 +86,11 @@ def main():
     print("\n------------------CODE FILE 2------------------")
     ast_2 = code_to_ast(code_file_2, print_ast=True)
 
-    function_list_1 = make_functiondef_list(ast_1)
-    function_list_2 = make_functiondef_list(ast_2)
+    ast_node_visitor = functiondef_visitor()
+    ast_node_visitor.visit(ast_1)
+    function_list_1 = ast_node_visitor.functiondefs
+    ast_node_visitor.visit(ast_2)
+    function_list_2 = ast_node_visitor.functiondefs
 
     create_profile(function_list_1[0])
     create_profile(function_list_1[1])
