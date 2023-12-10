@@ -34,7 +34,8 @@ class functiondef_visitor(ast.NodeVisitor):
             elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.BinOp):
                 bin_op_count += 1
 
-        function_profile = [node.name, parameter_count, var_declaration_count, if_count, for_loop_count, while_loop_count, function_call_count, bin_op_count]
+        function_profile = [node.name, parameter_count, var_declaration_count, if_count, 
+                            for_loop_count, while_loop_count, function_call_count, bin_op_count]
         self.function_profiles.append(function_profile)
         self.generic_visit(node)
 
